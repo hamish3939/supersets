@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gym Program</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="app">
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen active">
+            <header>
+                <h1>Gym Program</h1>
+                <p>3 sessions per week · Full body</p>
+            </header>
+
+            <div class="session-cards">
+                <div class="session-card" data-session="1">
+                    <div class="session-card-header">
+                        <span class="session-badge session-1">Session 1</span>
+                        <span class="session-time">~55 min</span>
+                    </div>
+                    <div class="session-card-body">
+                        <div class="session-focus">Chest, Pull-ups, Shoulders, Arms</div>
+                        <div class="session-last">
+                            <span class="last-label">Last:</span>
+                            <span class="last-date" id="last-session-1">Never</span>
+                        </div>
+                    </div>
+                    <button class="start-btn" onclick="startWorkout(1)">Start Workout</button>
+                </div>
+
+                <div class="session-card" data-session="2">
+                    <div class="session-card-header">
+                        <span class="session-badge session-2">Session 2</span>
+                        <span class="session-time">~51 min</span>
+                    </div>
+                    <div class="session-card-body">
+                        <div class="session-focus">Deadlift, Back, Legs, Core</div>
+                        <div class="session-last">
+                            <span class="last-label">Last:</span>
+                            <span class="last-date" id="last-session-2">Never</span>
+                        </div>
+                    </div>
+                    <button class="start-btn" onclick="startWorkout(2)">Start Workout</button>
+                </div>
+
+                <div class="session-card" data-session="3">
+                    <div class="session-card-header">
+                        <span class="session-badge session-3">Session 3</span>
+                        <span class="session-time">~57 min</span>
+                    </div>
+                    <div class="session-card-body">
+                        <div class="session-focus">Squat, Pull-ups, Dips, Glutes</div>
+                        <div class="session-last">
+                            <span class="last-label">Last:</span>
+                            <span class="last-date" id="last-session-3">Never</span>
+                        </div>
+                    </div>
+                    <button class="start-btn" onclick="startWorkout(3)">Start Workout</button>
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-btn active" onclick="showScreen('home')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Home</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('history')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('volume')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Volume</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('settings')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Workout Screen -->
+        <div id="workout-screen" class="screen">
+            <header class="workout-header">
+                <button class="back-btn" onclick="confirmExitWorkout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                <div class="workout-title">
+                    <h2 id="workout-session-title">Session 1</h2>
+                    <span class="workout-timer" id="workout-timer">00:00</span>
+                </div>
+                <button class="finish-btn" onclick="finishWorkout()">Finish</button>
+            </header>
+
+            <div class="exercises-container" id="exercises-container">
+                <!-- Exercises will be rendered here -->
+            </div>
+        </div>
+
+        <!-- History Screen -->
+        <div id="history-screen" class="screen">
+            <header>
+                <h1>History</h1>
+                <p>Your past workouts</p>
+            </header>
+
+            <div class="history-list" id="history-list">
+                <!-- History items will be rendered here -->
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-btn" onclick="showScreen('home')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Home</span>
+                </button>
+                <button class="nav-btn active" onclick="showScreen('history')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('volume')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Volume</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('settings')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Workout Detail Screen -->
+        <div id="workout-detail-screen" class="screen">
+            <header class="detail-header">
+                <button class="back-btn" onclick="showScreen('history')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                <div class="detail-title">
+                    <h2 id="detail-session-title">Session 1</h2>
+                    <span class="detail-date" id="detail-date">Jan 28, 2024</span>
+                </div>
+                <button class="delete-btn" onclick="deleteWorkout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+            </header>
+
+            <div class="workout-detail-content" id="workout-detail-content">
+                <!-- Detail will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Exercise Progress Screen -->
+        <div id="progress-screen" class="screen">
+            <header class="detail-header">
+                <button class="back-btn" onclick="goBackFromProgress()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                <div class="detail-title">
+                    <h2 id="progress-exercise-title">Bench Press</h2>
+                    <span class="detail-date">Progress</span>
+                </div>
+                <div style="width: 40px;"></div>
+            </header>
+
+            <div class="progress-content" id="progress-content">
+                <!-- Progress will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Volume Screen -->
+        <div id="volume-screen" class="screen">
+            <header>
+                <h1>Weekly Volume</h1>
+                <p>Sets per muscle group</p>
+            </header>
+
+            <div class="volume-content">
+                <div class="volume-section">
+                    <h3>Volume Summary</h3>
+                    <div class="volume-table">
+                        <div class="volume-row header">
+                            <span>Muscle Group</span>
+                            <span>Direct</span>
+                            <span>Indirect</span>
+                            <span>Total</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Chest</span>
+                            <span class="volume-value direct">12</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">12</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Back (lats/rows)</span>
+                            <span class="volume-value direct">14</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">14</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Shoulders</span>
+                            <span class="volume-value direct">9</span>
+                            <span class="volume-value indirect">~8-10</span>
+                            <span class="volume-value total">~17-19</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Quads</span>
+                            <span class="volume-value direct">13</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">13</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Glutes/Hamstrings</span>
+                            <span class="volume-value direct">10</span>
+                            <span class="volume-value indirect">~4</span>
+                            <span class="volume-value total">~14</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Biceps</span>
+                            <span class="volume-value direct">6</span>
+                            <span class="volume-value indirect">~10-12</span>
+                            <span class="volume-value total">~16-18</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Triceps</span>
+                            <span class="volume-value direct">3</span>
+                            <span class="volume-value indirect">~12-15</span>
+                            <span class="volume-value total">~15-18</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Rear Delts</span>
+                            <span class="volume-value direct">9</span>
+                            <span class="volume-value indirect">~4-6</span>
+                            <span class="volume-value total">~13-15</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Calves</span>
+                            <span class="volume-value direct">3</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">3</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Core</span>
+                            <span class="volume-value direct">6</span>
+                            <span class="volume-value indirect">~4-6</span>
+                            <span class="volume-value total">~10-12</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-btn" onclick="showScreen('home')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Home</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('history')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-btn active" onclick="showScreen('volume')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Volume</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('settings')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen">
+            <header>
+                <h1>Settings</h1>
+                <p>Manage your data</p>
+            </header>
+
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h3>Data Backup</h3>
+                    <p class="settings-desc">Export your workout data to a file for backup, or import from a previous backup.</p>
+                    <div class="settings-buttons">
+                        <button class="settings-btn" onclick="exportData()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Export Data
+                        </button>
+                        <button class="settings-btn" onclick="document.getElementById('import-file').click()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import Data
+                        </button>
+                        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                    </div>
+                </div>
+
+                <div class="settings-section danger-zone">
+                    <h3>Danger Zone</h3>
+                    <p class="settings-desc">Clear all workout history. This cannot be undone.</p>
+                    <button class="settings-btn danger" onclick="clearAllData()">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Clear All Data
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <h3>About</h3>
+                    <p class="settings-desc">Gym Program Tracker v1.0</p>
+                    <p class="settings-desc">Data is stored locally on this device.</p>
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-btn" onclick="showScreen('home')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Home</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('history')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-btn" onclick="showScreen('volume')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Volume</span>
+                </button>
+                <button class="nav-btn active" onclick="showScreen('settings')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-title">Confirm</h3>
+                <p id="modal-message">Are you sure?</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+                    <button class="modal-btn confirm" id="modal-confirm">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

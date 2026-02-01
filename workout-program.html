@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Program</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #141416;
+            --bg-card: #1a1a1f;
+            --bg-hover: #242429;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --text-muted: #6e6e73;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --border: #2a2a2f;
+            --success: #22c55e;
+            --session-1: #f97316;
+            --session-2: #8b5cf6;
+            --session-3: #06b6d4;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 12px 12px 60px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 16px 0;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Pure CSS Tabs */
+        .tabs {
+            position: relative;
+        }
+
+        .tabs input[type="radio"] {
+            display: none;
+        }
+
+        .tab-labels {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            padding: 8px 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-labels label {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+            text-align: center;
+        }
+
+        .tab-labels label:active {
+            transform: scale(0.98);
+        }
+
+        /* Active states for labels */
+        #tab1:checked ~ .tab-labels label[for="tab1"] {
+            background: var(--session-1);
+            color: white;
+        }
+
+        #tab2:checked ~ .tab-labels label[for="tab2"] {
+            background: var(--session-2);
+            color: white;
+        }
+
+        #tab3:checked ~ .tab-labels label[for="tab3"] {
+            background: var(--session-3);
+            color: white;
+        }
+
+        #tab4:checked ~ .tab-labels label[for="tab4"] {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #tab1:checked ~ .tab-content.content-1,
+        #tab2:checked ~ .tab-content.content-2,
+        #tab3:checked ~ .tab-content.content-3,
+        #tab4:checked ~ .tab-content.content-4 {
+            display: block;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .session-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .session-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .session-time svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Exercise Cards */
+        .exercise-block {
+            margin-bottom: 8px;
+        }
+
+        .exercise-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .exercise-card:hover {
+            border-color: var(--text-muted);
+        }
+
+        .exercise-card.superset {
+            border-left: 3px solid var(--accent);
+        }
+
+        .block-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+
+        .exercise-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .exercise-name .rotating {
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .exercise-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .equipment-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background: var(--bg-hover);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* Priority indicator */
+        .exercise-card.priority {
+            border-left: 3px solid var(--session-1);
+            background: linear-gradient(90deg, rgba(249, 115, 22, 0.08), transparent);
+        }
+
+        .superset-group.priority {
+            border-left: 3px solid var(--session-1);
+            background: linear-gradient(90deg, rgba(249, 115, 22, 0.08), var(--bg-secondary));
+        }
+
+        .superset-group.priority .exercise-card {
+            border-left: none;
+        }
+
+        .priority-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            background: var(--session-1);
+            border-radius: 4px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .priority-tag svg {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Superset grouping */
+        .superset-group {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .superset-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .superset-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .superset-group .exercise-card {
+            margin-bottom: 4px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .superset-group .exercise-card:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Flow section */
+        .flow-section {
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .flow-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .flow-path {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .flow-step {
+            padding: 4px 10px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            color: var(--text-muted);
+        }
+
+        /* Rotation Schedule */
+        .rotation-section {
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, var(--accent-glow), transparent);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--accent);
+        }
+
+        .rotation-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .rotation-table {
+            width: 100%;
+        }
+
+        .rotation-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rotation-row:last-child {
+            border-bottom: none;
+        }
+
+        .rotation-week {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .rotation-exercise {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .rotation-reps {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .rotation-note {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Volume Tables */
+        .volume-section {
+            margin-bottom: 24px;
+        }
+
+        .volume-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .volume-table {
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .volume-row {
+            display: grid;
+            grid-template-columns: 1fr repeat(3, auto);
+            gap: 12px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .volume-row:last-child {
+            border-bottom: none;
+        }
+
+        .volume-row.header {
+            background: var(--bg-secondary);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .volume-muscle {
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .volume-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .volume-value.direct {
+            color: var(--success);
+        }
+
+        .volume-value.indirect {
+            color: var(--text-muted);
+        }
+
+        .volume-value.total {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Mobile optimisations */
+        @media (max-width: 600px) {
+            .container {
+                padding: 8px 8px 60px;
+            }
+
+            header {
+                padding: 12px 0;
+                margin-bottom: 12px;
+            }
+
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            .tab-labels {
+                gap: 4px;
+                padding: 6px 0;
+            }
+
+            .tab-labels label {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+
+            .session-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .exercise-card {
+                padding: 8px 10px;
+            }
+
+            .exercise-name {
+                font-size: 0.85rem;
+            }
+
+            .exercise-details {
+                gap: 12px;
+            }
+
+            .volume-row {
+                grid-template-columns: 1fr repeat(3, 45px);
+                gap: 6px;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+
+            .volume-value {
+                font-size: 0.75rem;
+                min-width: 45px;
+            }
+
+            .flow-path {
+                font-size: 0.75rem;
+            }
+
+            .flow-step {
+                padding: 3px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gym Program</h1>
+            <p>3 sessions per week · Full body · Gym-friendly</p>
+        </header>
+
+        <div class="tabs">
+            <input type="radio" name="tabs" id="tab1" checked>
+            <input type="radio" name="tabs" id="tab2">
+            <input type="radio" name="tabs" id="tab3">
+            <input type="radio" name="tabs" id="tab4">
+
+            <div class="tab-labels">
+                <label for="tab1">Session 1</label>
+                <label for="tab2">Session 2</label>
+                <label for="tab3">Session 3</label>
+                <label for="tab4">Volume</label>
+            </div>
+
+            <!-- Session 1 -->
+            <div class="tab-content content-1">
+                <div class="session-header">
+                    <h2>Session 1</h2>
+                    <div class="session-time">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ~55 mins
+                    </div>
+                </div>
+
+                <div class="exercise-block">
+                    <div class="exercise-card priority">
+                        <div class="block-label">Block A</div>
+                        <div class="exercise-name">Barbell Bench Press <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 8-10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">2 min</span>
+                            </div>
+                        </div>
+                        <span class="equipment-tag">Bench + Barbell</span>
+                    </div>
+                </div>
+
+                <div class="exercise-block">
+                    <div class="exercise-card priority">
+                        <div class="block-label">Block B</div>
+                        <div class="exercise-name">Pull-ups (Neutral grip) <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 6-10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">90s</span>
+                            </div>
+                        </div>
+                        <span class="equipment-tag">Pull-up station</span>
+                    </div>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset C</div>
+                    <div class="exercise-card">
+                        <div class="block-label">C1</div>
+                        <div class="exercise-name">Dumbbell Overhead Press</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 8-10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">C2</div>
+                        <div class="exercise-name">Dumbbell Romanian Deadlift</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 10-12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Dumbbells</span>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset D</div>
+                    <div class="exercise-card">
+                        <div class="block-label">D1</div>
+                        <div class="exercise-name">Dumbbell Lateral Raises</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">D2</div>
+                        <div class="exercise-name">Dumbbell Bicep Curls</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Dumbbells</span>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset E</div>
+                    <div class="exercise-card">
+                        <div class="block-label">E1</div>
+                        <div class="exercise-name">Cable Face Pulls</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">E2</div>
+                        <div class="exercise-name">Cable Tricep Pushdowns</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">E3</div>
+                        <div class="exercise-name">Cable Single Arm Lat Pulldown</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 10-12 (each arm)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Cable station</span>
+                </div>
+
+                <div class="flow-section">
+                    <div class="flow-label">Flow</div>
+                    <div class="flow-path">
+                        <span class="flow-step">Bench</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Pull-up station</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Dumbbell area</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Cable station</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session 2 -->
+            <div class="tab-content content-2">
+                <div class="session-header">
+                    <h2>Session 2</h2>
+                    <div class="session-time">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ~51 mins
+                    </div>
+                </div>
+
+                <div class="superset-group priority">
+                    <div class="superset-label">Superset A <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                    <div class="exercise-card">
+                        <div class="block-label">A1</div>
+                        <div class="exercise-name">Deadlift (Barbell)</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 6-8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">90s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">A2</div>
+                        <div class="exercise-name">Chin-ups (Underhand grip)</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 6-10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">90s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Rack / Floor + Rack pull-up bar</span>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset B</div>
+                    <div class="exercise-card">
+                        <div class="block-label">B1</div>
+                        <div class="exercise-name">Dumbbell Single Arm Row</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 10-12 (each arm)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card priority">
+                        <div class="block-label">B2</div>
+                        <div class="exercise-name">Dumbbell Bulgarian Split Squat <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 10-12 (each leg)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Dumbbell + Bench</span>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset C</div>
+                    <div class="exercise-card">
+                        <div class="block-label">C1</div>
+                        <div class="exercise-name">Dumbbell Reverse Flyes</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">C2</div>
+                        <div class="exercise-name">Dumbbell Single Leg Calf Raise</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15 (each leg)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">C3</div>
+                        <div class="exercise-name">Russian Twists (with plate)</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 15-20 (each side)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Dumbbells + Plate</span>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset D</div>
+                    <div class="exercise-card">
+                        <div class="block-label">D1</div>
+                        <div class="exercise-name">Wide Grip Seated Cable Row</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 10-12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">D2</div>
+                        <div class="exercise-name">Cable Face Pulls</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Cable station</span>
+                </div>
+
+                <div class="flow-section">
+                    <div class="flow-label">Flow</div>
+                    <div class="flow-path">
+                        <span class="flow-step">Rack (deadlift + chin-ups)</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Dumbbell area + bench</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Cable station</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session 3 -->
+            <div class="tab-content content-3">
+                <div class="session-header">
+                    <h2>Session 3</h2>
+                    <div class="session-time">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ~57 mins
+                    </div>
+                </div>
+
+                <div class="exercise-block">
+                    <div class="exercise-card priority">
+                        <div class="block-label">Block A</div>
+                        <div class="exercise-name">Barbell Back Squat <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 6-8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">2.5 min</span>
+                            </div>
+                        </div>
+                        <span class="equipment-tag">Squat rack</span>
+                    </div>
+                </div>
+
+                <div class="superset-group priority">
+                    <div class="superset-label">Superset B <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                    <div class="exercise-card">
+                        <div class="block-label">B1</div>
+                        <div class="exercise-name">Pull-ups (Neutral grip)</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 6-10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">B2</div>
+                        <div class="exercise-name">Dips (Slight lean forward)</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 8-12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">90s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Pull-up / Dip station</span>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset C</div>
+                    <div class="exercise-card">
+                        <div class="block-label">C1</div>
+                        <div class="exercise-name">Dumbbell Single Arm Chest Press</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">4 × 10-12 (each arm)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">C2</div>
+                        <div class="exercise-name">Pistol Squat / Curtsy Lunge <span class="rotating">(rotating)</span></div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 8-12 (each leg)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">60s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Dumbbell + Bench</span>
+                </div>
+
+                <div class="exercise-block">
+                    <div class="exercise-card priority">
+                        <div class="block-label">Block D</div>
+                        <div class="exercise-name">Barbell Hip Thrust <span class="priority-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority</span></div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 8-10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">90s</span>
+                            </div>
+                        </div>
+                        <span class="equipment-tag">Barbell + Bench</span>
+                    </div>
+                </div>
+
+                <div class="superset-group">
+                    <div class="superset-label">Superset E</div>
+                    <div class="exercise-card">
+                        <div class="block-label">E1</div>
+                        <div class="exercise-name">Dumbbell Hammer Curls</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exercise-card">
+                        <div class="block-label">E2</div>
+                        <div class="exercise-name">Bench Leg Raises</div>
+                        <div class="exercise-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Sets × Reps</span>
+                                <span class="detail-value">3 × 12-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rest</span>
+                                <span class="detail-value">45s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="equipment-tag">Dumbbells + Bench</span>
+                </div>
+
+                <div class="flow-section">
+                    <div class="flow-label">Flow</div>
+                    <div class="flow-path">
+                        <span class="flow-step">Squat rack</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Pull-up / Dip station</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Dumbbell area + bench</span>
+                    </div>
+                </div>
+
+                <div class="rotation-section">
+                    <div class="rotation-title">C2 Rotation Schedule</div>
+                    <div class="rotation-table">
+                        <div class="rotation-row">
+                            <span class="rotation-week">Week 1</span>
+                            <span class="rotation-exercise">Pistol Squats</span>
+                            <span class="rotation-reps">3 × 8-10 (each leg)</span>
+                        </div>
+                        <div class="rotation-row">
+                            <span class="rotation-week">Week 2</span>
+                            <span class="rotation-exercise">Dumbbell Curtsy Lunges</span>
+                            <span class="rotation-reps">3 × 10-12 (each leg)</span>
+                        </div>
+                    </div>
+                    <p class="rotation-note">Cycle repeats: Week 3 = Pistol Squats, Week 4 = Curtsy Lunges, etc.</p>
+                </div>
+            </div>
+
+            <!-- Volume Section -->
+            <div class="tab-content content-4">
+                <div class="session-header">
+                    <h2>Weekly Volume</h2>
+                </div>
+
+                <div class="volume-section">
+                    <h3>Volume Summary</h3>
+                    <div class="volume-table">
+                        <div class="volume-row header">
+                            <span>Muscle Group</span>
+                            <span>Direct</span>
+                            <span>Indirect</span>
+                            <span>Total</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Chest</span>
+                            <span class="volume-value direct">12</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">12</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Back (lats/rows)</span>
+                            <span class="volume-value direct">14</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">14</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Shoulders (lateral/rear)</span>
+                            <span class="volume-value direct">9</span>
+                            <span class="volume-value indirect">~8-10</span>
+                            <span class="volume-value total">~17-19</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Quads</span>
+                            <span class="volume-value direct">13</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">13</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Glutes/Hamstrings</span>
+                            <span class="volume-value direct">10</span>
+                            <span class="volume-value indirect">~4</span>
+                            <span class="volume-value total">~14</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Biceps</span>
+                            <span class="volume-value direct">6</span>
+                            <span class="volume-value indirect">~10-12</span>
+                            <span class="volume-value total">~16-18</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Triceps</span>
+                            <span class="volume-value direct">3</span>
+                            <span class="volume-value indirect">~12-15</span>
+                            <span class="volume-value total">~15-18</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Rear Delts/Upper Back</span>
+                            <span class="volume-value direct">9</span>
+                            <span class="volume-value indirect">~4-6</span>
+                            <span class="volume-value total">~13-15</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Calves</span>
+                            <span class="volume-value direct">3</span>
+                            <span class="volume-value indirect">—</span>
+                            <span class="volume-value total">3</span>
+                        </div>
+                        <div class="volume-row">
+                            <span class="volume-muscle">Core</span>
+                            <span class="volume-value direct">6</span>
+                            <span class="volume-value indirect">~4-6</span>
+                            <span class="volume-value total">~10-12</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="volume-section">
+                    <h3>Indirect Contribution Sources</h3>
+                    <div class="volume-table">
+                        <div class="volume-row header" style="grid-template-columns: 1fr 2fr;">
+                            <span>Muscle Group</span>
+                            <span>Source of Indirect Work</span>
+                        </div>
+                        <div class="volume-row" style="grid-template-columns: 1fr 2fr;">
+                            <span class="volume-muscle">Shoulders</span>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">Bench Press, Overhead Press, Dips, Chest Press (anterior); Rows, Pull-ups (rear)</span>
+                        </div>
+                        <div class="volume-row" style="grid-template-columns: 1fr 2fr;">
+                            <span class="volume-muscle">Glutes/Hamstrings</span>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">Deadlift, Back Squat</span>
+                        </div>
+                        <div class="volume-row" style="grid-template-columns: 1fr 2fr;">
+                            <span class="volume-muscle">Biceps</span>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">All pulling movements (Pull-ups, Chin-ups, Rows, Lat Pulldowns)</span>
+                        </div>
+                        <div class="volume-row" style="grid-template-columns: 1fr 2fr;">
+                            <span class="volume-muscle">Triceps</span>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">All pressing movements (Bench, Overhead Press, Dips, Chest Press)</span>
+                        </div>
+                        <div class="volume-row" style="grid-template-columns: 1fr 2fr;">
+                            <span class="volume-muscle">Rear Delts/Upper Back</span>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">Rows, Pull-ups, Deadlifts</span>
+                        </div>
+                        <div class="volume-row" style="grid-template-columns: 1fr 2fr;">
+                            <span class="volume-muscle">Core</span>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">Squats, Deadlifts, Hip Thrusts (bracing)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
