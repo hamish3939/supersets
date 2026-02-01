@@ -330,38 +330,117 @@ function renderSuperset(superset) {
 }
 
 function renderSetInputs(exerciseId, numSets, lastData, targetReps) {
-    const settings = getSettings();
     const defaultReps = getDefaultReps(targetReps);
-    let html = '';
+
+    // Store exercise info for adding sets later
+    if (!state.exerciseInfo) state.exerciseInfo = {};
+    state.exerciseInfo[exerciseId] = { numSets, lastData, targetReps, defaultReps };
+
+    let html = `<div class="sets-list" id="${exerciseId}-sets">`;
 
     for (let i = 1; i <= numSets; i++) {
-        const lastWeight = lastData && lastData.sets[i-1] ? lastData.sets[i-1].weight : '';
-        // Pre-fill reps with default from plan
-        const repsValue = defaultReps;
-
-        html += `
-            <div class="set-row">
-                <span class="set-number">Set ${i}</span>
-                <div class="set-inputs">
-                    <div class="weight-input-wrapper" onclick="openWeightPicker('${exerciseId}', ${i}, ${lastWeight || 0})">
-                        <input type="text" class="set-input weight-display" id="${exerciseId}-set${i}-weight"
-                               value="" placeholder="${lastWeight || '—'}" readonly>
-                        <span class="input-label">kg</span>
-                    </div>
-                    <span style="color: var(--text-muted);">×</span>
-                    <input type="number" class="set-input reps-input" id="${exerciseId}-set${i}-reps"
-                           value="${repsValue}" inputmode="numeric"
-                           onchange="updateSet('${exerciseId}', ${i})"
-                           onfocus="this.select()">
-                    <span class="input-label">reps</span>
-                </div>
-                <div class="set-check" id="${exerciseId}-set${i}-check" onclick="toggleSetCheck('${exerciseId}', ${i})">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-            </div>
-        `;
+        html += renderSingleSet(exerciseId, i, lastData, defaultReps);
     }
+
+    html += '</div>';
+    html += `<button class="add-set-btn" id="${exerciseId}-add-set" style="display: none;" onclick="addSet('${exerciseId}')">+ Add Set</button>`;
+
     return html;
+}
+
+function renderSingleSet(exerciseId, setNum, lastData, defaultReps) {
+    const lastWeight = lastData && lastData.sets[setNum-1] ? lastData.sets[setNum-1].weight : null;
+    const lastReps = lastData && lastData.sets[setNum-1] ? lastData.sets[setNum-1].reps : null;
+    const repsValue = defaultReps;
+
+    return `
+        <div class="set-row" id="${exerciseId}-set${setNum}-row">
+            <span class="set-number">Set ${setNum}</span>
+            <div class="set-inputs">
+                ${lastWeight ? `
+                    <button class="last-weight-btn" onclick="useLastWeight('${exerciseId}', ${setNum}, ${lastWeight})">
+                        Last: ${lastWeight}kg
+                    </button>
+                ` : ''}
+                <div class="weight-input-wrapper" onclick="openWeightPicker('${exerciseId}', ${setNum}, ${lastWeight || 20})">
+                    <input type="text" class="set-input weight-display" id="${exerciseId}-set${setNum}-weight"
+                           value="" placeholder="—" readonly>
+                    <span class="input-label">kg</span>
+                </div>
+                <span style="color: var(--text-muted);">×</span>
+                <input type="number" class="set-input reps-input" id="${exerciseId}-set${setNum}-reps"
+                       value="${repsValue}" inputmode="numeric"
+                       onchange="updateSet('${exerciseId}', ${setNum})"
+                       onfocus="this.select()">
+                <span class="input-label">reps</span>
+            </div>
+            <button class="set-remove" onclick="removeSet('${exerciseId}', ${setNum})">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+    `;
+}
+
+function useLastWeight(exerciseId, setNum, weight) {
+    const input = document.getElementById(`${exerciseId}-set${setNum}-weight`);
+    input.value = weight;
+    updateSet(exerciseId, setNum);
+    markSetComplete(exerciseId, setNum);
+}
+
+function markSetComplete(exerciseId, setNum) {
+    const row = document.getElementById(`${exerciseId}-set${setNum}-row`);
+    if (row) {
+        row.classList.add('completed');
+    }
+}
+
+function removeSet(exerciseId, setNum) {
+    const row = document.getElementById(`${exerciseId}-set${setNum}-row`);
+    if (row) {
+        row.remove();
+
+        // Remove from workout data
+        if (state.currentWorkout.exercises[exerciseId]) {
+            state.currentWorkout.exercises[exerciseId].sets[setNum - 1] = null;
+        }
+
+        // Show add set button
+        const addBtn = document.getElementById(`${exerciseId}-add-set`);
+        if (addBtn) addBtn.style.display = 'block';
+
+        // Renumber remaining sets
+        renumberSets(exerciseId);
+    }
+}
+
+function renumberSets(exerciseId) {
+    const container = document.getElementById(`${exerciseId}-sets`);
+    const rows = container.querySelectorAll('.set-row');
+    rows.forEach((row, index) => {
+        const setNumEl = row.querySelector('.set-number');
+        if (setNumEl) {
+            setNumEl.textContent = `Set ${index + 1}`;
+        }
+    });
+}
+
+function addSet(exerciseId) {
+    const info = state.exerciseInfo[exerciseId];
+    if (!info) return;
+
+    const container = document.getElementById(`${exerciseId}-sets`);
+    const currentSets = container.querySelectorAll('.set-row').length;
+    const newSetNum = currentSets + 1;
+
+    const newSetHtml = renderSingleSet(exerciseId, newSetNum, info.lastData, info.defaultReps);
+    container.insertAdjacentHTML('beforeend', newSetHtml);
+
+    // Hide add button if we're back to original count
+    if (newSetNum >= info.numSets) {
+        const addBtn = document.getElementById(`${exerciseId}-add-set`);
+        if (addBtn) addBtn.style.display = 'none';
+    }
 }
 
 function updateSet(exerciseId, setNum) {
@@ -378,12 +457,6 @@ function updateSet(exerciseId, setNum) {
     };
 }
 
-function toggleSetCheck(exerciseId, setNum) {
-    const check = document.getElementById(`${exerciseId}-set${setNum}-check`);
-    check.classList.toggle('checked');
-    updateSet(exerciseId, setNum);
-}
-
 // Weight Picker
 let weightPickerState = {
     exerciseId: null,
@@ -394,17 +467,16 @@ let weightPickerState = {
 function openWeightPicker(exerciseId, setNum, lastWeight) {
     const settings = getSettings();
 
-    // If using numpad mode, just focus a regular input
+    // If using numpad mode, show a prompt or use native input
     if (settings.weightInput === 'numpad') {
         const input = document.getElementById(`${exerciseId}-set${setNum}-weight`);
-        input.readOnly = false;
-        input.type = 'number';
-        input.inputMode = 'decimal';
-        input.step = '0.5';
-        input.placeholder = lastWeight || 'kg';
-        input.value = '';
-        input.focus();
-        input.onchange = () => updateSet(exerciseId, setNum);
+        const currentVal = input.value || lastWeight || '';
+        const newWeight = prompt('Enter weight (kg):', currentVal);
+        if (newWeight !== null && newWeight !== '') {
+            input.value = parseFloat(newWeight) || 0;
+            updateSet(exerciseId, setNum);
+            markSetComplete(exerciseId, setNum);
+        }
         return;
     }
 
@@ -416,15 +488,6 @@ function openWeightPicker(exerciseId, setNum, lastWeight) {
     display.textContent = weightPickerState.currentWeight;
 
     picker.classList.add('active');
-
-    // Scroll to current weight
-    setTimeout(() => {
-        const wheel = document.getElementById('weight-wheel');
-        const targetValue = weightPickerState.currentWeight;
-        const itemHeight = 50;
-        const index = Math.round(targetValue / 2.5); // 2.5kg increments
-        wheel.scrollTop = index * itemHeight - (wheel.clientHeight / 2) + (itemHeight / 2);
-    }, 50);
 }
 
 function closeWeightPicker() {
@@ -436,6 +499,7 @@ function confirmWeightPicker() {
     const input = document.getElementById(`${exerciseId}-set${setNum}-weight`);
     input.value = currentWeight;
     updateSet(exerciseId, setNum);
+    markSetComplete(exerciseId, setNum);
     closeWeightPicker();
 }
 
