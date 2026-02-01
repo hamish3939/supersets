@@ -286,19 +286,6 @@
 
             <div class="settings-content">
                 <div class="settings-section">
-                    <h3>Weight Input</h3>
-                    <p class="settings-desc">Choose how to enter weight values.</p>
-                    <div class="settings-toggle" id="weight-input-toggle">
-                        <button class="toggle-option active" data-value="wheel" onclick="setWeightInputMode('wheel')">
-                            Scroll Wheel
-                        </button>
-                        <button class="toggle-option" data-value="numpad" onclick="setWeightInputMode('numpad')">
-                            Numpad
-                        </button>
-                    </div>
-                </div>
-
-                <div class="settings-section">
                     <h3>Data Backup</h3>
                     <p class="settings-desc">Export your workout data to a file for backup, or import from a previous backup.</p>
                     <div class="settings-buttons">
@@ -366,26 +353,31 @@
         <div id="toast" class="toast"></div>
 
         <!-- Weight Picker -->
-        <div id="weight-picker" class="weight-picker">
-            <div class="weight-picker-backdrop" onclick="closeWeightPicker()"></div>
-            <div class="weight-picker-sheet">
-                <div class="weight-picker-header">
-                    <button class="weight-picker-cancel" onclick="closeWeightPicker()">Cancel</button>
-                    <span class="weight-picker-title">Select Weight</span>
-                    <button class="weight-picker-done" onclick="confirmWeightPicker()">Done</button>
+        <div id="weight-picker" class="picker-modal">
+            <div class="picker-backdrop" onclick="closeWeightPicker()"></div>
+            <div class="picker-sheet">
+                <div class="picker-header">
+                    <button class="picker-cancel" onclick="closeWeightPicker()">Cancel</button>
+                    <span class="picker-title">Weight</span>
+                    <button class="picker-done" onclick="confirmWeightPicker()">Done</button>
                 </div>
-                <div class="weight-picker-body">
-                    <div class="weight-picker-display">
+                <div class="picker-body">
+                    <button class="picker-last-btn" id="weight-picker-last-btn" onclick="useLastWeightFromPicker()" style="display: none;">
+                        Last: 0kg
+                    </button>
+                    <div class="picker-display">
                         <span id="weight-picker-value">20</span>
-                        <span class="weight-picker-unit">kg</span>
+                        <span class="picker-unit">kg</span>
                     </div>
-                    <div class="weight-picker-controls">
-                        <button class="weight-adjust-btn large" onclick="adjustWeight(-5)">−5</button>
-                        <button class="weight-adjust-btn" onclick="adjustWeight(-2.5)">−2.5</button>
-                        <button class="weight-adjust-btn" onclick="adjustWeight(2.5)">+2.5</button>
-                        <button class="weight-adjust-btn large" onclick="adjustWeight(5)">+5</button>
+                    <div class="picker-controls">
+                        <button class="picker-btn large" onclick="adjustWeight(-5)">−5</button>
+                        <button class="picker-btn" onclick="adjustWeight(-2.5)">−2.5</button>
+                        <button class="picker-btn small" onclick="adjustWeight(-1)">−1</button>
+                        <button class="picker-btn small" onclick="adjustWeight(1)">+1</button>
+                        <button class="picker-btn" onclick="adjustWeight(2.5)">+2.5</button>
+                        <button class="picker-btn large" onclick="adjustWeight(5)">+5</button>
                     </div>
-                    <div class="weight-quick-picks">
+                    <div class="picker-quick-picks">
                         <button onclick="selectWeightFromWheel(0)">0</button>
                         <button onclick="selectWeightFromWheel(10)">10</button>
                         <button onclick="selectWeightFromWheel(20)">20</button>
@@ -395,6 +387,39 @@
                         <button onclick="selectWeightFromWheel(60)">60</button>
                         <button onclick="selectWeightFromWheel(80)">80</button>
                         <button onclick="selectWeightFromWheel(100)">100</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reps Picker -->
+        <div id="reps-picker" class="picker-modal">
+            <div class="picker-backdrop" onclick="closeRepsPicker()"></div>
+            <div class="picker-sheet">
+                <div class="picker-header">
+                    <button class="picker-cancel" onclick="closeRepsPicker()">Cancel</button>
+                    <span class="picker-title">Reps</span>
+                    <button class="picker-done" onclick="confirmRepsPicker()">Done</button>
+                </div>
+                <div class="picker-body">
+                    <div class="picker-display">
+                        <span id="reps-picker-value">10</span>
+                        <span class="picker-unit">reps</span>
+                    </div>
+                    <div class="picker-controls">
+                        <button class="picker-btn large" onclick="adjustReps(-5)">−5</button>
+                        <button class="picker-btn" onclick="adjustReps(-1)">−1</button>
+                        <button class="picker-btn" onclick="adjustReps(1)">+1</button>
+                        <button class="picker-btn large" onclick="adjustReps(5)">+5</button>
+                    </div>
+                    <div class="picker-quick-picks">
+                        <button onclick="selectRepsFromPicker(5)">5</button>
+                        <button onclick="selectRepsFromPicker(6)">6</button>
+                        <button onclick="selectRepsFromPicker(8)">8</button>
+                        <button onclick="selectRepsFromPicker(10)">10</button>
+                        <button onclick="selectRepsFromPicker(12)">12</button>
+                        <button onclick="selectRepsFromPicker(15)">15</button>
+                        <button onclick="selectRepsFromPicker(20)">20</button>
                     </div>
                 </div>
             </div>

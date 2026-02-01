@@ -134,38 +134,6 @@ let state = {
     currentExerciseReps: {} // Store target reps for each exercise
 };
 
-// Settings
-function getSettings() {
-    const data = localStorage.getItem('settings');
-    return data ? JSON.parse(data) : { weightInput: 'wheel' };
-}
-
-function saveSettings(settings) {
-    localStorage.setItem('settings', JSON.stringify(settings));
-}
-
-function setWeightInputMode(mode) {
-    const settings = getSettings();
-    settings.weightInput = mode;
-    saveSettings(settings);
-
-    // Update toggle UI
-    document.querySelectorAll('.toggle-option').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === mode);
-    });
-
-    showToast(`Weight input: ${mode === 'wheel' ? 'Scroll Wheel' : 'Numpad'}`);
-}
-
-function initSettings() {
-    const settings = getSettings();
-    const toggle = document.getElementById('weight-input-toggle');
-    if (toggle) {
-        toggle.querySelectorAll('.toggle-option').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.value === settings.weightInput);
-        });
-    }
-}
 
 // Helper to get default reps from exercise plan (takes first number from range like "8-10")
 function getDefaultReps(repsString) {
@@ -177,7 +145,6 @@ function getDefaultReps(repsString) {
 document.addEventListener('DOMContentLoaded', () => {
     loadLastWorkoutDates();
     renderHistory();
-    initSettings();
 });
 
 // Storage helpers
@@ -350,29 +317,27 @@ function renderSetInputs(exerciseId, numSets, lastData, targetReps) {
 
 function renderSingleSet(exerciseId, setNum, lastData, defaultReps) {
     const lastWeight = lastData && lastData.sets[setNum-1] ? lastData.sets[setNum-1].weight : null;
-    const lastReps = lastData && lastData.sets[setNum-1] ? lastData.sets[setNum-1].reps : null;
     const repsValue = defaultReps;
+
+    // Store last weight for this set so weight picker can access it
+    if (!state.lastWeights) state.lastWeights = {};
+    state.lastWeights[`${exerciseId}-${setNum}`] = lastWeight;
 
     return `
         <div class="set-row" id="${exerciseId}-set${setNum}-row">
             <span class="set-number">Set ${setNum}</span>
             <div class="set-inputs">
-                ${lastWeight ? `
-                    <button class="last-weight-btn" onclick="useLastWeight('${exerciseId}', ${setNum}, ${lastWeight})">
-                        Last: ${lastWeight}kg
-                    </button>
-                ` : ''}
                 <div class="weight-input-wrapper" onclick="openWeightPicker('${exerciseId}', ${setNum}, ${lastWeight || 20})">
                     <input type="text" class="set-input weight-display" id="${exerciseId}-set${setNum}-weight"
                            value="" placeholder="—" readonly>
                     <span class="input-label">kg</span>
                 </div>
                 <span style="color: var(--text-muted);">×</span>
-                <input type="number" class="set-input reps-input" id="${exerciseId}-set${setNum}-reps"
-                       value="${repsValue}" inputmode="numeric"
-                       onchange="updateSet('${exerciseId}', ${setNum})"
-                       onfocus="this.select()">
-                <span class="input-label">reps</span>
+                <div class="reps-input-wrapper" onclick="openRepsPicker('${exerciseId}', ${setNum}, ${repsValue})">
+                    <input type="text" class="set-input reps-display" id="${exerciseId}-set${setNum}-reps"
+                           value="${repsValue}" readonly>
+                    <span class="input-label">reps</span>
+                </div>
             </div>
             <button class="set-remove" onclick="removeSet('${exerciseId}', ${setNum})">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -465,27 +430,23 @@ let weightPickerState = {
 };
 
 function openWeightPicker(exerciseId, setNum, lastWeight) {
-    const settings = getSettings();
+    const currentInput = document.getElementById(`${exerciseId}-set${setNum}-weight`);
+    const currentVal = currentInput.value ? parseFloat(currentInput.value) : (lastWeight || 20);
 
-    // If using numpad mode, show a prompt or use native input
-    if (settings.weightInput === 'numpad') {
-        const input = document.getElementById(`${exerciseId}-set${setNum}-weight`);
-        const currentVal = input.value || lastWeight || '';
-        const newWeight = prompt('Enter weight (kg):', currentVal);
-        if (newWeight !== null && newWeight !== '') {
-            input.value = parseFloat(newWeight) || 0;
-            updateSet(exerciseId, setNum);
-            markSetComplete(exerciseId, setNum);
-        }
-        return;
-    }
-
-    // Wheel picker mode
-    weightPickerState = { exerciseId, setNum, currentWeight: lastWeight || 20 };
+    weightPickerState = { exerciseId, setNum, currentWeight: currentVal, lastWeight: lastWeight };
 
     const picker = document.getElementById('weight-picker');
     const display = document.getElementById('weight-picker-value');
     display.textContent = weightPickerState.currentWeight;
+
+    // Show/hide last weight button
+    const lastBtn = document.getElementById('weight-picker-last-btn');
+    if (lastWeight && lastWeight > 0) {
+        lastBtn.style.display = 'block';
+        lastBtn.textContent = `Last: ${lastWeight}kg`;
+    } else {
+        lastBtn.style.display = 'none';
+    }
 
     picker.classList.add('active');
 }
@@ -513,6 +474,55 @@ function selectWeightFromWheel(weight) {
     document.getElementById('weight-picker-value').textContent = weight;
 }
 
+function useLastWeightFromPicker() {
+    if (weightPickerState.lastWeight) {
+        weightPickerState.currentWeight = weightPickerState.lastWeight;
+        document.getElementById('weight-picker-value').textContent = weightPickerState.lastWeight;
+    }
+}
+
+// Reps Picker
+let repsPickerState = {
+    exerciseId: null,
+    setNum: null,
+    currentReps: 10
+};
+
+function openRepsPicker(exerciseId, setNum, currentReps) {
+    const currentInput = document.getElementById(`${exerciseId}-set${setNum}-reps`);
+    const currentVal = currentInput.value ? parseInt(currentInput.value) : currentReps;
+
+    repsPickerState = { exerciseId, setNum, currentReps: currentVal };
+
+    const picker = document.getElementById('reps-picker');
+    const display = document.getElementById('reps-picker-value');
+    display.textContent = repsPickerState.currentReps;
+
+    picker.classList.add('active');
+}
+
+function closeRepsPicker() {
+    document.getElementById('reps-picker').classList.remove('active');
+}
+
+function confirmRepsPicker() {
+    const { exerciseId, setNum, currentReps } = repsPickerState;
+    const input = document.getElementById(`${exerciseId}-set${setNum}-reps`);
+    input.value = currentReps;
+    updateSet(exerciseId, setNum);
+    closeRepsPicker();
+}
+
+function adjustReps(delta) {
+    repsPickerState.currentReps = Math.max(1, repsPickerState.currentReps + delta);
+    document.getElementById('reps-picker-value').textContent = repsPickerState.currentReps;
+}
+
+function selectRepsFromPicker(reps) {
+    repsPickerState.currentReps = reps;
+    document.getElementById('reps-picker-value').textContent = reps;
+}
+
 // Timer
 function startTimer() {
     updateTimer();
@@ -536,34 +546,47 @@ function updateTimer() {
 
 // Finish workout
 function finishWorkout() {
-    stopTimer();
+    const elapsed = Math.floor((Date.now() - state.workoutStartTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
 
-    const duration = Math.floor((Date.now() - state.workoutStartTime) / 1000);
-    const workout = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        session: state.currentSession,
-        duration: duration,
-        exercises: state.currentWorkout.exercises
-    };
+    showModal(
+        'Finish Workout?',
+        `You've been working out for ${timeStr}. Save and finish?`,
+        () => {
+            stopTimer();
 
-    // Count completed sets
-    let totalSets = 0;
-    Object.values(workout.exercises).forEach(ex => {
-        totalSets += ex.sets.filter(s => s.weight > 0 || s.reps > 0).length;
-    });
-    workout.totalSets = totalSets;
+            const duration = elapsed;
+            const workout = {
+                id: Date.now().toString(),
+                date: new Date().toISOString(),
+                session: state.currentSession,
+                duration: duration,
+                exercises: state.currentWorkout.exercises
+            };
 
-    const workouts = getWorkouts();
-    workouts.push(workout);
-    saveWorkouts(workouts);
+            // Count completed sets
+            let totalSets = 0;
+            Object.values(workout.exercises).forEach(ex => {
+                if (ex.sets) {
+                    totalSets += ex.sets.filter(s => s && (s.weight > 0 || s.reps > 0)).length;
+                }
+            });
+            workout.totalSets = totalSets;
 
-    showToast('Workout saved!');
-    showScreen('home');
+            const workouts = getWorkouts();
+            workouts.push(workout);
+            saveWorkouts(workouts);
 
-    state.currentWorkout = null;
-    state.currentSession = null;
-    state.workoutStartTime = null;
+            showToast('Workout saved!');
+            showScreen('home');
+
+            state.currentWorkout = null;
+            state.currentSession = null;
+            state.workoutStartTime = null;
+        }
+    );
 }
 
 function confirmExitWorkout() {

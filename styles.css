@@ -510,31 +510,6 @@ header p {
     color: var(--text-muted);
 }
 
-/* Last Weight Button */
-.last-weight-btn {
-    padding: 8px 12px;
-    background: var(--bg-hover);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.last-weight-btn:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-}
-
-.last-weight-btn:active {
-    transform: scale(0.95);
-}
-
 /* Remove Set Button */
 .set-remove {
     width: 32px;
@@ -576,9 +551,6 @@ header p {
     font-weight: 600;
 }
 
-.set-row.completed .last-weight-btn {
-    display: none;
-}
 
 /* Add Set Button */
 .add-set-btn {
@@ -629,7 +601,18 @@ header p {
 .history-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+}
+
+.history-month {
+    margin-bottom: 4px;
+}
+
+.history-month h3 {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
 }
 
 .history-item {
@@ -1112,53 +1095,23 @@ header p {
     opacity: 1;
 }
 
-/* Weight Input Wrapper */
-.weight-input-wrapper {
+/* Input Wrappers */
+.weight-input-wrapper,
+.reps-input-wrapper {
     display: flex;
     align-items: center;
     gap: 4px;
     cursor: pointer;
 }
 
-.weight-display {
+.weight-display,
+.reps-display {
     cursor: pointer;
     caret-color: transparent;
 }
 
-/* Settings Toggle */
-.settings-toggle {
-    display: flex;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-    padding: 4px;
-    gap: 4px;
-}
-
-.toggle-option {
-    flex: 1;
-    padding: 10px 16px;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    color: var(--text-secondary);
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.toggle-option.active {
-    background: var(--accent);
-    color: white;
-}
-
-.toggle-option:hover:not(.active) {
-    color: var(--text-primary);
-}
-
-/* Weight Picker */
-.weight-picker {
+/* Picker Modal (Weight & Reps) */
+.picker-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -1168,11 +1121,11 @@ header p {
     z-index: 300;
 }
 
-.weight-picker.active {
+.picker-modal.active {
     display: block;
 }
 
-.weight-picker-backdrop {
+.picker-backdrop {
     position: absolute;
     top: 0;
     left: 0;
@@ -1182,7 +1135,7 @@ header p {
     animation: fadeIn 0.2s ease;
 }
 
-.weight-picker-sheet {
+.picker-sheet {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -1198,7 +1151,7 @@ header p {
     to { transform: translateY(0); }
 }
 
-.weight-picker-header {
+.picker-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1206,13 +1159,13 @@ header p {
     border-bottom: 1px solid var(--border);
 }
 
-.weight-picker-title {
+.picker-title {
     font-weight: 600;
     font-size: 1rem;
 }
 
-.weight-picker-cancel,
-.weight-picker-done {
+.picker-cancel,
+.picker-done {
     background: none;
     border: none;
     font-family: inherit;
@@ -1221,78 +1174,104 @@ header p {
     padding: 4px 8px;
 }
 
-.weight-picker-cancel {
+.picker-cancel {
     color: var(--text-muted);
 }
 
-.weight-picker-done {
+.picker-done {
     color: var(--accent);
     font-weight: 600;
 }
 
-.weight-picker-body {
-    padding: 24px 20px;
+.picker-body {
+    padding: 20px;
 }
 
-.weight-picker-display {
-    text-align: center;
-    margin-bottom: 24px;
-}
-
-.weight-picker-display #weight-picker-value {
+.picker-last-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    background: var(--bg-hover);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.picker-last-btn:active {
+    background: var(--accent);
+    color: white;
+}
+
+.picker-display {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.picker-display span:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3.5rem;
     font-weight: 700;
     color: var(--text-primary);
 }
 
-.weight-picker-unit {
-    font-size: 1.5rem;
+.picker-unit {
+    font-size: 1.25rem;
     color: var(--text-muted);
     margin-left: 4px;
 }
 
-.weight-picker-controls {
+.picker-controls {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 20px;
 }
 
-.weight-adjust-btn {
-    width: 60px;
-    height: 48px;
+.picker-btn {
+    width: 54px;
+    height: 44px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.weight-adjust-btn.large {
-    width: 70px;
+.picker-btn.large {
+    width: 60px;
     background: var(--accent);
     border-color: var(--accent);
     color: white;
 }
 
-.weight-adjust-btn:active {
+.picker-btn.small {
+    width: 48px;
+    font-size: 0.85rem;
+}
+
+.picker-btn:active {
     transform: scale(0.95);
 }
 
-.weight-quick-picks {
+.picker-quick-picks {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
 }
 
-.weight-quick-picks button {
-    padding: 10px 16px;
+.picker-quick-picks button {
+    padding: 10px 14px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 20px;
@@ -1303,7 +1282,7 @@ header p {
     transition: all 0.2s ease;
 }
 
-.weight-quick-picks button:active {
+.picker-quick-picks button:active {
     background: var(--accent);
     border-color: var(--accent);
     color: white;
