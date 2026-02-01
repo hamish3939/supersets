@@ -307,6 +307,42 @@ header p {
     padding-bottom: 20px;
 }
 
+/* Flow Section */
+.flow-section {
+    padding: 12px 14px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.flow-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.flow-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.flow-step {
+    padding: 4px 10px;
+    background: var(--bg-card);
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.flow-arrow {
+    color: var(--text-muted);
+}
+
 /* Exercise Block */
 .exercise-block {
     background: var(--bg-card);

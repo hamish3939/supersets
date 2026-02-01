@@ -1,8 +1,9 @@
 // Workout Program Data
 const PROGRAM = {
     1: {
-        name: "Session 1",
+        name: "Push & Pull",
         duration: "~55 min",
+        flow: ["Bench", "Pull-up station", "Dumbbell area", "Cable station"],
         exercises: [
             { id: "bench-press", name: "Barbell Bench Press", block: "A", sets: 4, reps: "8-10", rest: "2 min", priority: true, equipment: "Bench + Barbell" },
             { id: "pullups", name: "Pull-ups (Neutral grip)", block: "B", sets: 4, reps: "6-10", rest: "90s", priority: true, equipment: "Pull-up station" },
@@ -37,8 +38,9 @@ const PROGRAM = {
         ]
     },
     2: {
-        name: "Session 2",
+        name: "Deadlift & Back",
         duration: "~51 min",
+        flow: ["Rack (deadlift + chin-ups)", "Dumbbell area + bench", "Cable station"],
         exercises: [
             {
                 superset: true,
@@ -81,8 +83,9 @@ const PROGRAM = {
         ]
     },
     3: {
-        name: "Session 3",
+        name: "Squat & Dips",
         duration: "~57 min",
+        flow: ["Squat rack", "Pull-up / Dip station", "Dumbbell area + bench"],
         exercises: [
             { id: "back-squat", name: "Barbell Back Squat", block: "A", sets: 4, reps: "6-8", rest: "2.5 min", priority: true, equipment: "Squat rack" },
             {
@@ -198,7 +201,8 @@ function startWorkout(sessionNum) {
     state.currentWorkout = { session: sessionNum, exercises: {} };
     state.workoutStartTime = Date.now();
 
-    document.getElementById('workout-session-title').textContent = `Session ${sessionNum}`;
+    const session = PROGRAM[sessionNum];
+    document.getElementById('workout-session-title').textContent = session.name;
 
     renderExercises(sessionNum);
     showScreen('workout');
@@ -211,6 +215,20 @@ function renderExercises(sessionNum) {
     const session = PROGRAM[sessionNum];
 
     let html = '';
+
+    // Add flow section at the top
+    if (session.flow) {
+        html += `
+            <div class="flow-section">
+                <div class="flow-label">Flow</div>
+                <div class="flow-path">
+                    ${session.flow.map((step, i) =>
+                        `<span class="flow-step">${step}</span>${i < session.flow.length - 1 ? '<span class="flow-arrow">→</span>' : ''}`
+                    ).join('')}
+                </div>
+            </div>
+        `;
+    }
 
     session.exercises.forEach(item => {
         if (item.superset) {
@@ -414,10 +432,11 @@ function renderHistory() {
             currentMonth = month;
         }
 
+        const sessionName = PROGRAM[workout.session]?.name || `Session ${workout.session}`;
         html += `
             <div class="history-item" onclick="showWorkoutDetail('${workout.id}')">
                 <div class="history-header">
-                    <span class="history-session">Session ${workout.session}</span>
+                    <span class="history-session">${sessionName}</span>
                     <span class="history-date">${formatDate(date)}</span>
                 </div>
                 <div class="history-stats">
@@ -439,7 +458,8 @@ function showWorkoutDetail(workoutId) {
 
     state.selectedWorkoutId = workoutId;
 
-    document.getElementById('detail-session-title').textContent = `Session ${workout.session}`;
+    const sessionName = PROGRAM[workout.session]?.name || `Session ${workout.session}`;
+    document.getElementById('detail-session-title').textContent = sessionName;
     document.getElementById('detail-date').textContent = formatDate(new Date(workout.date));
 
     const container = document.getElementById('workout-detail-content');
