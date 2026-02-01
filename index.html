@@ -286,6 +286,19 @@
 
             <div class="settings-content">
                 <div class="settings-section">
+                    <h3>Weight Input</h3>
+                    <p class="settings-desc">Choose how to enter weight values.</p>
+                    <div class="settings-toggle" id="weight-input-toggle">
+                        <button class="toggle-option active" data-value="wheel" onclick="setWeightInputMode('wheel')">
+                            Scroll Wheel
+                        </button>
+                        <button class="toggle-option" data-value="numpad" onclick="setWeightInputMode('numpad')">
+                            Numpad
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
                     <h3>Data Backup</h3>
                     <p class="settings-desc">Export your workout data to a file for backup, or import from a previous backup.</p>
                     <div class="settings-buttons">
@@ -351,6 +364,41 @@
 
         <!-- Toast -->
         <div id="toast" class="toast"></div>
+
+        <!-- Weight Picker -->
+        <div id="weight-picker" class="weight-picker">
+            <div class="weight-picker-backdrop" onclick="closeWeightPicker()"></div>
+            <div class="weight-picker-sheet">
+                <div class="weight-picker-header">
+                    <button class="weight-picker-cancel" onclick="closeWeightPicker()">Cancel</button>
+                    <span class="weight-picker-title">Select Weight</span>
+                    <button class="weight-picker-done" onclick="confirmWeightPicker()">Done</button>
+                </div>
+                <div class="weight-picker-body">
+                    <div class="weight-picker-display">
+                        <span id="weight-picker-value">20</span>
+                        <span class="weight-picker-unit">kg</span>
+                    </div>
+                    <div class="weight-picker-controls">
+                        <button class="weight-adjust-btn large" onclick="adjustWeight(-5)">−5</button>
+                        <button class="weight-adjust-btn" onclick="adjustWeight(-2.5)">−2.5</button>
+                        <button class="weight-adjust-btn" onclick="adjustWeight(2.5)">+2.5</button>
+                        <button class="weight-adjust-btn large" onclick="adjustWeight(5)">+5</button>
+                    </div>
+                    <div class="weight-quick-picks">
+                        <button onclick="selectWeightFromWheel(0)">0</button>
+                        <button onclick="selectWeightFromWheel(10)">10</button>
+                        <button onclick="selectWeightFromWheel(20)">20</button>
+                        <button onclick="selectWeightFromWheel(30)">30</button>
+                        <button onclick="selectWeightFromWheel(40)">40</button>
+                        <button onclick="selectWeightFromWheel(50)">50</button>
+                        <button onclick="selectWeightFromWheel(60)">60</button>
+                        <button onclick="selectWeightFromWheel(80)">80</button>
+                        <button onclick="selectWeightFromWheel(100)">100</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

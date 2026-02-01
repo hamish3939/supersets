@@ -130,13 +130,54 @@ let state = {
     workoutStartTime: null,
     timerInterval: null,
     selectedWorkoutId: null,
-    selectedExerciseId: null
+    selectedExerciseId: null,
+    currentExerciseReps: {} // Store target reps for each exercise
 };
+
+// Settings
+function getSettings() {
+    const data = localStorage.getItem('settings');
+    return data ? JSON.parse(data) : { weightInput: 'wheel' };
+}
+
+function saveSettings(settings) {
+    localStorage.setItem('settings', JSON.stringify(settings));
+}
+
+function setWeightInputMode(mode) {
+    const settings = getSettings();
+    settings.weightInput = mode;
+    saveSettings(settings);
+
+    // Update toggle UI
+    document.querySelectorAll('.toggle-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === mode);
+    });
+
+    showToast(`Weight input: ${mode === 'wheel' ? 'Scroll Wheel' : 'Numpad'}`);
+}
+
+function initSettings() {
+    const settings = getSettings();
+    const toggle = document.getElementById('weight-input-toggle');
+    if (toggle) {
+        toggle.querySelectorAll('.toggle-option').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.value === settings.weightInput);
+        });
+    }
+}
+
+// Helper to get default reps from exercise plan (takes first number from range like "8-10")
+function getDefaultReps(repsString) {
+    const match = repsString.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 10;
+}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadLastWorkoutDates();
     renderHistory();
+    initSettings();
 });
 
 // Storage helpers
@@ -252,7 +293,7 @@ function renderSingleExercise(exercise) {
             <div class="exercise-target">${exercise.sets} × ${exercise.reps} · Rest ${exercise.rest}</div>
             ${lastData ? `<div class="exercise-last">Last: <strong>${formatLastSets(lastData)}</strong></div>` : ''}
             <div class="sets-container">
-                ${renderSetInputs(exercise.id, exercise.sets, lastData)}
+                ${renderSetInputs(exercise.id, exercise.sets, lastData, exercise.reps)}
             </div>
         </div>
     `;
@@ -272,7 +313,7 @@ function renderSuperset(superset) {
                 <div class="exercise-target">${exercise.sets} × ${exercise.reps} · Rest ${exercise.rest}</div>
                 ${lastData ? `<div class="exercise-last">Last: <strong>${formatLastSets(lastData)}</strong></div>` : ''}
                 <div class="sets-container">
-                    ${renderSetInputs(exercise.id, exercise.sets, lastData)}
+                    ${renderSetInputs(exercise.id, exercise.sets, lastData, exercise.reps)}
                 </div>
             </div>
         `;
@@ -288,24 +329,30 @@ function renderSuperset(superset) {
     `;
 }
 
-function renderSetInputs(exerciseId, numSets, lastData) {
+function renderSetInputs(exerciseId, numSets, lastData, targetReps) {
+    const settings = getSettings();
+    const defaultReps = getDefaultReps(targetReps);
     let html = '';
+
     for (let i = 1; i <= numSets; i++) {
         const lastWeight = lastData && lastData.sets[i-1] ? lastData.sets[i-1].weight : '';
-        const lastReps = lastData && lastData.sets[i-1] ? lastData.sets[i-1].reps : '';
+        // Pre-fill reps with default from plan
+        const repsValue = defaultReps;
 
         html += `
             <div class="set-row">
                 <span class="set-number">Set ${i}</span>
                 <div class="set-inputs">
-                    <input type="number" class="set-input" id="${exerciseId}-set${i}-weight"
-                           placeholder="${lastWeight || 'kg'}" inputmode="decimal" step="0.5"
-                           onchange="updateSet('${exerciseId}', ${i})">
-                    <span class="input-label">kg</span>
+                    <div class="weight-input-wrapper" onclick="openWeightPicker('${exerciseId}', ${i}, ${lastWeight || 0})">
+                        <input type="text" class="set-input weight-display" id="${exerciseId}-set${i}-weight"
+                               value="" placeholder="${lastWeight || '—'}" readonly>
+                        <span class="input-label">kg</span>
+                    </div>
                     <span style="color: var(--text-muted);">×</span>
-                    <input type="number" class="set-input" id="${exerciseId}-set${i}-reps"
-                           placeholder="${lastReps || 'reps'}" inputmode="numeric"
-                           onchange="updateSet('${exerciseId}', ${i})">
+                    <input type="number" class="set-input reps-input" id="${exerciseId}-set${i}-reps"
+                           value="${repsValue}" inputmode="numeric"
+                           onchange="updateSet('${exerciseId}', ${i})"
+                           onfocus="this.select()">
                     <span class="input-label">reps</span>
                 </div>
                 <div class="set-check" id="${exerciseId}-set${i}-check" onclick="toggleSetCheck('${exerciseId}', ${i})">
@@ -335,6 +382,71 @@ function toggleSetCheck(exerciseId, setNum) {
     const check = document.getElementById(`${exerciseId}-set${setNum}-check`);
     check.classList.toggle('checked');
     updateSet(exerciseId, setNum);
+}
+
+// Weight Picker
+let weightPickerState = {
+    exerciseId: null,
+    setNum: null,
+    currentWeight: 0
+};
+
+function openWeightPicker(exerciseId, setNum, lastWeight) {
+    const settings = getSettings();
+
+    // If using numpad mode, just focus a regular input
+    if (settings.weightInput === 'numpad') {
+        const input = document.getElementById(`${exerciseId}-set${setNum}-weight`);
+        input.readOnly = false;
+        input.type = 'number';
+        input.inputMode = 'decimal';
+        input.step = '0.5';
+        input.placeholder = lastWeight || 'kg';
+        input.value = '';
+        input.focus();
+        input.onchange = () => updateSet(exerciseId, setNum);
+        return;
+    }
+
+    // Wheel picker mode
+    weightPickerState = { exerciseId, setNum, currentWeight: lastWeight || 20 };
+
+    const picker = document.getElementById('weight-picker');
+    const display = document.getElementById('weight-picker-value');
+    display.textContent = weightPickerState.currentWeight;
+
+    picker.classList.add('active');
+
+    // Scroll to current weight
+    setTimeout(() => {
+        const wheel = document.getElementById('weight-wheel');
+        const targetValue = weightPickerState.currentWeight;
+        const itemHeight = 50;
+        const index = Math.round(targetValue / 2.5); // 2.5kg increments
+        wheel.scrollTop = index * itemHeight - (wheel.clientHeight / 2) + (itemHeight / 2);
+    }, 50);
+}
+
+function closeWeightPicker() {
+    document.getElementById('weight-picker').classList.remove('active');
+}
+
+function confirmWeightPicker() {
+    const { exerciseId, setNum, currentWeight } = weightPickerState;
+    const input = document.getElementById(`${exerciseId}-set${setNum}-weight`);
+    input.value = currentWeight;
+    updateSet(exerciseId, setNum);
+    closeWeightPicker();
+}
+
+function adjustWeight(delta) {
+    weightPickerState.currentWeight = Math.max(0, weightPickerState.currentWeight + delta);
+    document.getElementById('weight-picker-value').textContent = weightPickerState.currentWeight;
+}
+
+function selectWeightFromWheel(weight) {
+    weightPickerState.currentWeight = weight;
+    document.getElementById('weight-picker-value').textContent = weight;
 }
 
 // Timer
@@ -454,21 +566,24 @@ function renderHistory() {
 function showWorkoutDetail(workoutId) {
     const workouts = getWorkouts();
     const workout = workouts.find(w => w.id === workoutId);
-    if (!workout) return;
+    if (!workout) {
+        console.error('Workout not found:', workoutId);
+        return;
+    }
 
     state.selectedWorkoutId = workoutId;
 
-    const sessionName = PROGRAM[workout.session]?.name || `Session ${workout.session}`;
+    const session = PROGRAM[workout.session];
+    const sessionName = session?.name || `Session ${workout.session}`;
     document.getElementById('detail-session-title').textContent = sessionName;
     document.getElementById('detail-date').textContent = formatDate(new Date(workout.date));
 
     const container = document.getElementById('workout-detail-content');
-    const session = PROGRAM[workout.session];
 
     let html = `
         <div class="detail-stats">
             <div class="detail-stat">
-                <div class="detail-stat-value">${formatDuration(workout.duration)}</div>
+                <div class="detail-stat-value">${formatDuration(workout.duration || 0)}</div>
                 <div class="detail-stat-label">Duration</div>
             </div>
             <div class="detail-stat">
@@ -478,31 +593,36 @@ function showWorkoutDetail(workoutId) {
         </div>
     `;
 
-    // Flatten exercises from session
-    const allExercises = [];
-    session.exercises.forEach(item => {
-        if (item.superset) {
-            item.exercises.forEach(ex => allExercises.push(ex));
-        } else {
-            allExercises.push(item);
-        }
-    });
+    // If we have session data, show exercises
+    if (session && workout.exercises) {
+        // Flatten exercises from session
+        const allExercises = [];
+        session.exercises.forEach(item => {
+            if (item.superset) {
+                item.exercises.forEach(ex => allExercises.push(ex));
+            } else {
+                allExercises.push(item);
+            }
+        });
 
-    allExercises.forEach(exercise => {
-        const data = workout.exercises[exercise.id];
-        if (data && data.sets.some(s => s.weight > 0 || s.reps > 0)) {
-            html += `
-                <div class="detail-exercise">
-                    <div class="detail-exercise-name" onclick="showExerciseProgress('${exercise.id}')">${exercise.name}</div>
-                    <div class="detail-sets">
-                        ${data.sets.filter(s => s.weight > 0 || s.reps > 0).map(s =>
-                            `<span class="detail-set">${s.weight}kg × ${s.reps}</span>`
-                        ).join('')}
+        allExercises.forEach(exercise => {
+            const data = workout.exercises[exercise.id];
+            if (data && data.sets && data.sets.some(s => s.weight > 0 || s.reps > 0)) {
+                html += `
+                    <div class="detail-exercise">
+                        <div class="detail-exercise-name" onclick="showExerciseProgress('${exercise.id}')">${exercise.name}</div>
+                        <div class="detail-sets">
+                            ${data.sets.filter(s => s.weight > 0 || s.reps > 0).map(s =>
+                                `<span class="detail-set">${s.weight}kg × ${s.reps}</span>`
+                            ).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
-        }
-    });
+                `;
+            }
+        });
+    } else {
+        html += '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No exercise data recorded</p>';
+    }
 
     container.innerHTML = html;
     showScreen('workout-detail');
